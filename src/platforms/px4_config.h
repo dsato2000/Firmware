@@ -49,3 +49,5 @@
 #elif defined (__PX4_POSIX)
 # include <board_config.h>
 #endif
+
+#define FREQ_COMMAND_ENABLE		//pwm周波数 可変)有効 @RcIn,CH10
