@@ -66,6 +66,10 @@
 #include <uORB/topics/multirotor_motor_limits.h>
 #include <uORB/topics/parameter_update.h>
 
+#ifdef FREQ_COMMAND_ENABLE
+#include <drivers/drv_rc_input.h>
+#endif
+
 using namespace time_literals;
 
 /** Mode given via CLI */
@@ -206,6 +210,10 @@ private:
 	PX4FMU(const PX4FMU &) = delete;
 	PX4FMU operator=(const PX4FMU &) = delete;
 
+#ifdef FREQ_COMMAND_ENABLE
+	int _rc_sub;
+	struct input_rc_s rc_input;
+#endif
 };
 
 PX4FMU::PX4FMU() :
@@ -710,6 +718,14 @@ PX4FMU::update_pwm_out_state(bool on)
 		up_pwm_servo_init(_pwm_mask);
 		set_pwm_rate(_pwm_alt_rate_channels, _pwm_default_rate, _pwm_alt_rate);
 		_pwm_initialized = true;
+
+#ifdef FREQ_COMMAND_ENABLE
+		_rc_sub = orb_subscribe(ORB_ID(input_rc));
+		/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
+		//次回取り込み準備
+		orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);			//すぐに更新されません
+		//px4_usleep(100000);
+#endif
 	}
 
 	up_pwm_servo_arm(on);
@@ -725,6 +741,19 @@ bool PX4FMU::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
 
 	/* output to the servos */
 	if (_pwm_initialized) {
+#ifdef FREQ_COMMAND_ENABLE
+		bool rc_updated;
+		orb_check(_rc_sub, &rc_updated);
+		if (rc_updated) {
+			//@10ch: min_val = 964(=67Hz), max_val = 2064(=400Hz);
+			unsigned alt_rate = ((400-67)*(rc_input.values[9]-964)/(2064-964))+67;	//[Hz]
+			set_pwm_rate(_pwm_alt_rate_channels, _pwm_default_rate, alt_rate);
+			//up_pwm_servo_set_rate_group_update(unsigned group, unsigned rate);
+
+			//次回取り込み準備
+			orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);	//すぐに更新されません
+		}
+#endif
 		for (size_t i = 0; i < num_outputs; i++) {
 			up_pwm_servo_set(i, outputs[i]);
 		}
@@ -753,7 +782,7 @@ PX4FMU::Run()
 
 	perf_begin(_cycle_perf);
 
-	_mixing_output.update();
+	_mixing_output.update();		//test
 
 	/* update PWM status if armed or if disarmed PWM values are set */
 	bool pwm_on = _mixing_output.armed().armed || (_num_disarmed_set > 0) || _mixing_output.armed().in_esc_calibration_mode;
