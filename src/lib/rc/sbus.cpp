@@ -640,6 +640,9 @@ sbus_decode(uint64_t frame_time, uint8_t *frame, uint16_t *values, uint16_t *num
 	unsigned chancount = (max_values > SBUS_INPUT_CHANNELS) ?
 			     SBUS_INPUT_CHANNELS : max_values;
 
+
+	//printf("values[channel]:\n");
+
 	/* use the decoder matrix to extract channel data */
 	for (unsigned channel = 0; channel < chancount; channel++) {
 		unsigned value = 0;
@@ -660,7 +663,10 @@ sbus_decode(uint64_t frame_time, uint8_t *frame, uint16_t *values, uint16_t *num
 
 		/* convert 0-2048 values to 1000-2000 ppm encoding in a not too sloppy fashion */
 		values[channel] = (uint16_t)(value * SBUS_SCALE_FACTOR + .5f) + SBUS_SCALE_OFFSET;
+
+		//printf(" %d,", values[channel]);
 	}
+	//printf("\n");
 
 	/* decode switch channels if data fields are wide enough */
 	if (max_values > 17 && chancount > 15) {

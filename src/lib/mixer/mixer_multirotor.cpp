@@ -74,8 +74,9 @@ const char *_config_key[] = {"4x"};
 #endif /* MIXER_MULTIROTOR_USE_MOCK_GEOMETRY */
 
 
-#define debug(fmt, args...)	do { } while(0)
-//#define debug(fmt, args...)	do { printf("[mixer] " fmt "\n", ##args); } while(0)
+//#define debug(fmt, args...)	do { } while(0)
+#define debug(fmt, args...)	do { printf("[mixer] " fmt "\n", ##args); } while(0)
+//test
 //#include <debug.h>
 //#define debug(fmt, args...)	syslog(fmt "\n", ##args)
 
