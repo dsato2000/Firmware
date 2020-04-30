@@ -413,19 +413,7 @@ RCInput::cycle()
 		} else {
 			// read all available data from the serial RC input UART
 			newBytes = ::read(_rcs_fd, &_rcs_buf[0], SBUS_BUFFER_SIZE);
-			//test add
-			::write(_rcs_fd, &_rcs_buf[0], newBytes);
-#if 0
-			int writeByte = ::write(_rcs_fd, &_rcs_buf[0], newBytes);
-			printf("S.BUS\n");
-			printf("read()");
-			for(int i=0;i<newBytes;i++){
-				printf(" %d,", _rcs_buf[i]);
-			}
-			printf("\n");
-			PX4_INFO("write(): %d", writeByte);
-#endif
-			}
+		}
 
 		switch (_rc_scan_state) {
 		case RC_SCAN_SBUS:
@@ -449,6 +437,18 @@ RCInput::cycle()
 						fill_rc_in(_raw_rc_count, _raw_rc_values, cycle_timestamp,
 							   sbus_frame_drop, sbus_failsafe, frame_drops);
 						_rc_scan_locked = true;
+
+						//test add
+						::write(_rcs_fd, &_rcs_buf[0], newBytes);
+#if 1
+						printf("S.BUS\n");
+						printf("read()");
+						for(int i=0;i<newBytes;i++){
+							printf(" %d,", _rcs_buf[i]);
+						}
+						printf("\n");
+						PX4_INFO("write(): %d", newBytes);
+#endif
 					}
 				}
 

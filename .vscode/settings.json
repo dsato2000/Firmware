@@ -96,5 +96,6 @@
         "workbench.editor.highlightModifiedTabs": true,
         "workbench.enableExperiments": false,
         "workbench.settings.enableNaturalLanguageSearch": false,
-        "workbench.statusBar.feedback.visible": false
+        "workbench.statusBar.feedback.visible": false,
+        "C_Cpp.dimInactiveRegions": false
 }
