@@ -51,3 +51,4 @@
 #endif
 
 #define FREQ_COMMAND_ENABLE		//pwm周波数 可変)有効 @RcIn,CH10
+#define VTOL_MIXER_ENABLE		//mixer VtolRotorAngle)Enable

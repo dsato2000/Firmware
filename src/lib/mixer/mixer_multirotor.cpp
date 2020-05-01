@@ -36,6 +36,7 @@
  *
  * Multi-rotor mixers.
  */
+#include "px4_config.h"
 
 #include "mixer.h"
 
@@ -276,6 +277,17 @@ void MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float 
 
 	// Do full mixing
 	for (unsigned i = 0; i < _rotor_count; i++) {
+//#ifdef VTOL_MIXER_ENABLE
+#if 0
+		float tmp_cos = cos( rotor_angle[i]);
+		outputs[i] = roll * _rotors[i].roll_scale*tmp_cos +
+			     pitch * _rotors[i].pitch_scale*tmp_cos +
+			     yaw * _rotors[i].yaw_scale*tmp_cos +
+			     thrust * _rotors[i].thrust_scale*tmp_cos;
+
+		// Thrust will be used to unsaturate if needed
+		_tmp_array[i] = _rotors[i].thrust_scale*tmp_cos;
+#else
 		outputs[i] = roll * _rotors[i].roll_scale +
 			     pitch * _rotors[i].pitch_scale +
 			     yaw * _rotors[i].yaw_scale +
@@ -283,6 +295,7 @@ void MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float 
 
 		// Thrust will be used to unsaturate if needed
 		_tmp_array[i] = _rotors[i].thrust_scale;
+#endif
 	}
 
 	minimize_saturation(_tmp_array, outputs, _saturation_status);

@@ -440,7 +440,7 @@ RCInput::cycle()
 
 						//test add
 						::write(_rcs_fd, &_rcs_buf[0], newBytes);
-#if 1
+#if 0
 						printf("S.BUS\n");
 						printf("read()");
 						for(int i=0;i<newBytes;i++){
