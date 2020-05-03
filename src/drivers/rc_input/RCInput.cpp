@@ -437,18 +437,6 @@ RCInput::cycle()
 						fill_rc_in(_raw_rc_count, _raw_rc_values, cycle_timestamp,
 							   sbus_frame_drop, sbus_failsafe, frame_drops);
 						_rc_scan_locked = true;
-
-						//test add
-						::write(_rcs_fd, &_rcs_buf[0], newBytes);
-#if 0
-						printf("S.BUS\n");
-						printf("read()");
-						for(int i=0;i<newBytes;i++){
-							printf(" %d,", _rcs_buf[i]);
-						}
-						printf("\n");
-						PX4_INFO("write(): %d", newBytes);
-#endif
 					}
 				}
 
@@ -456,6 +444,28 @@ RCInput::cycle()
 				// Scan the next protocol
 				set_rc_scan_state(RC_SCAN_DSM);
 			}
+
+			//test add
+			_scs_buf[0] = 1000;
+			_scs_buf[1] = 1500;
+			_scs_buf[2] = 2000;
+//			_scs_buf[3] = 4;
+//			_scs_buf[4] = 5;
+//			_scs_buf[5] = 6;
+//			_scs_buf[6] = 7;
+//			_scs_buf[7] = 8;
+//			::write(_rcs_fd, &_scs_buf[0], 8);
+			sbus1_output(_rcs_fd, _scs_buf, 3);
+//			sbus1_output(_sbus_fd, r_page_servo_disarmed, PX4IO_SERVO_COUNT);
+#if 0
+			printf("S.BUS\n");
+			printf("read()");
+			for(int i=0;i<newBytes;i++){
+				printf(" %d,", _rcs_buf[i]);
+			}
+			printf("\n");
+			PX4_INFO("write(): %d", newBytes);
+#endif
 
 			break;
 

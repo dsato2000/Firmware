@@ -137,6 +137,9 @@ private:
 	char		_device[20] {};					///< device / serial port path
 
 	uint8_t _rcs_buf[SBUS_BUFFER_SIZE] {};
+	//test
+	//uint8_t _scs_buf[SBUS_BUFFER_SIZE] {};
+	uint16_t _scs_buf[SBUS_BUFFER_SIZE] {};
 
 	uint16_t _raw_rc_values[input_rc_s::RC_INPUT_MAX_CHANNELS] {};
 	uint16_t _raw_rc_count{};
