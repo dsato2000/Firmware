@@ -51,4 +51,5 @@
 #endif
 
 #define FREQ_COMMAND_ENABLE		//pwm周波数 可変)有効 @RcIn,CH10
+#define	SBUS_OUTPUT_ENABLE		//S.BUS指令出力)有効 PWM出力1CH=SBUS出力1CH(PWMと同一出力)
 #define VTOL_MIXER_ENABLE		//mixer VtolRotorAngle)Enable

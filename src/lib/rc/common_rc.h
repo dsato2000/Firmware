@@ -19,6 +19,16 @@ typedef  struct rc_decode_buf_ {
 		ReceiverFcPacketHoTT _hottrxpacket;
 	};
 } rc_decode_buf_t;
+
+#define	SBUS_CHANNEL_MAX	16
+typedef struct rc_out_ {
+	uint16_t	pwm_value[SBUS_CHANNEL_MAX];
+	uint8_t		servo_count;
+} rc_out_t;
 #pragma pack(pop)
 
 extern rc_decode_buf_t rc_decode_buf;
+
+#ifdef SBUS_OUTPUT_ENABLE
+extern rc_out_t rc_out;
+#endif

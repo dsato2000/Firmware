@@ -70,6 +70,8 @@
 #include <drivers/drv_rc_input.h>
 #endif
 
+#include "rc/common_rc.h"
+
 using namespace time_literals;
 
 /** Mode given via CLI */
@@ -758,6 +760,14 @@ bool PX4FMU::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
 			up_pwm_servo_set(i, outputs[i]);
 		}
 	}
+
+#ifdef SBUS_OUTPUT_ENABLE
+//	outputs[0] = 1000;
+//	outputs[1] = 1500;
+//	outputs[2] = 2000;
+	memcpy( rc_out.pwm_value, outputs, num_outputs);
+	rc_out.servo_count = num_outputs;
+#endif
 
 	/* Trigger all timer's channels in Oneshot mode to fire
 	 * the oneshots with updated values.
