@@ -273,21 +273,69 @@ void MultirotorMixer::mix_airmode_rp(float roll, float pitch, float yaw, float t
 
 void MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float thrust, float *outputs)
 {
+	// roll(+):後ろから見て、右回り
+	// pitch(+):前回り
+	// yaw(+):上から見て、右回り
+#ifdef VTOL_MIXER_ENABLE
+	// mix_airmode_disabled()をベースに変更
+	//Air Frame
+	//			3:CW	1:CCW
+	//				本体
+	//			2:CCW	4:CW
+	// 5:left aileron	6:right aileron
+	// Do full mixing
+	float roll_scale;
+	float pitch_scale;
+	float yaw_scale;
+	float thrust_scale;
+	float tilt_angle = 0;	//垂直離陸時のチルト角度がゼロ(全モータのチルト角は同じ)
+	//float tmp_sin = sin( tilt_angle);
+	float tmp_cos = cos( tilt_angle);
+	for (unsigned i = 0; i < _rotor_count; i++) {
+		if((i=3)||(i=1)||(i=2)||(i=4)){
+			roll_scale	= _rotors[i].roll_scale * tmp_cos;		//チルト角の増加と共に、ロール指令を減少
+			pitch_scale	= _rotors[i].pitch_scale * tmp_cos;		//チルト角の増加と共に、ピッチ指令を減少
+			yaw_scale		= _rotors[i].yaw_scale;
+			thrust_scale	= _rotors[i].thrust_scale;
+		}else if((i=5)||(i=6)){
+			roll_scale	= _rotors[i].roll_scale;
+			pitch_scale	= _rotors[i].pitch_scale;
+			//roll_scale	= _rotors[i].roll_scale * tmp_sin;		//チルト角の増加と共に、ロール指令を増加
+			//pitch_scale	= _rotors[i].pitch_scale * tmp_sin;		//チルト角の増加と共に、ピッチ指令を増加
+			yaw_scale		= _rotors[i].yaw_scale;
+			thrust_scale	= _rotors[i].thrust_scale;
+		}
+		outputs[i] = roll * roll_scale +
+			     pitch * pitch_scale +
+			     yaw * yaw_scale +
+			     thrust * thrust_scale;
+		// Thrust will be used to unsaturate if needed
+		_tmp_array[i] = _rotors[i].thrust_scale;
+	}
+
+	// only reduce thrust
+	minimize_saturation(_tmp_array, outputs, _saturation_status, 0.f, 1.f, true);
+
+	// Reduce roll/pitch acceleration if needed to unsaturate
+	for (unsigned i = 0; i < _rotor_count; i++) {
+		_tmp_array[i] = _rotors[i].roll_scale;
+	}
+
+	minimize_saturation(_tmp_array, outputs, _saturation_status);
+
+	for (unsigned i = 0; i < _rotor_count; i++) {
+		_tmp_array[i] = _rotors[i].pitch_scale;
+	}
+
+	minimize_saturation(_tmp_array, outputs, _saturation_status);
+
+	// Mix yaw independently
+	mix_yaw(yaw, outputs);
+#else
 	// Airmode for roll, pitch and yaw
 
 	// Do full mixing
 	for (unsigned i = 0; i < _rotor_count; i++) {
-//#ifdef VTOL_MIXER_ENABLE
-#if 0
-		float tmp_cos = cos( rotor_angle[i]);
-		outputs[i] = roll * _rotors[i].roll_scale*tmp_cos +
-			     pitch * _rotors[i].pitch_scale*tmp_cos +
-			     yaw * _rotors[i].yaw_scale*tmp_cos +
-			     thrust * _rotors[i].thrust_scale*tmp_cos;
-
-		// Thrust will be used to unsaturate if needed
-		_tmp_array[i] = _rotors[i].thrust_scale*tmp_cos;
-#else
 		outputs[i] = roll * _rotors[i].roll_scale +
 			     pitch * _rotors[i].pitch_scale +
 			     yaw * _rotors[i].yaw_scale +
@@ -295,7 +343,7 @@ void MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float 
 
 		// Thrust will be used to unsaturate if needed
 		_tmp_array[i] = _rotors[i].thrust_scale;
-#endif
+
 	}
 
 	minimize_saturation(_tmp_array, outputs, _saturation_status);
@@ -307,6 +355,7 @@ void MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float 
 	}
 
 	minimize_saturation(_tmp_array, outputs, _saturation_status);
+#endif
 }
 
 void MultirotorMixer::mix_airmode_disabled(float roll, float pitch, float yaw, float thrust, float *outputs)
@@ -392,7 +441,10 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 
 	case Airmode::disabled:
 	default: // just in case: default to disabled
-		mix_airmode_disabled(roll, pitch, yaw, thrust, outputs);
+//		mix_airmode_disabled(roll, pitch, yaw, thrust, outputs);
+//test
+		mix_airmode_rpy(roll, pitch, yaw, thrust, outputs);
+
 		break;
 	}
 
