@@ -292,18 +292,23 @@ void MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float 
 	//float tmp_sin = sin( tilt_angle);
 	float tmp_cos = cos( tilt_angle);
 	for (unsigned i = 0; i < _rotor_count; i++) {
-		if((i=3)||(i=1)||(i=2)||(i=4)){
-			roll_scale	= _rotors[i].roll_scale * tmp_cos;		//チルト角の増加と共に、ロール指令を減少
-			pitch_scale	= _rotors[i].pitch_scale * tmp_cos;		//チルト角の増加と共に、ピッチ指令を減少
+		if((i=3)||(i=1)){
+			roll_scale		= _rotors[i].roll_scale * tmp_cos;		//チルト角の増加と共に、ロール指令を減少
+			pitch_scale		= _rotors[i].pitch_scale * tmp_cos;		//チルト角の増加と共に、ピッチ指令を減少
 			yaw_scale		= _rotors[i].yaw_scale;
 			thrust_scale	= _rotors[i].thrust_scale;
-		}else if((i=5)||(i=6)){
-			roll_scale	= _rotors[i].roll_scale;
-			pitch_scale	= _rotors[i].pitch_scale;
-			//roll_scale	= _rotors[i].roll_scale * tmp_sin;		//チルト角の増加と共に、ロール指令を増加
-			//pitch_scale	= _rotors[i].pitch_scale * tmp_sin;		//チルト角の増加と共に、ピッチ指令を増加
+		}else if((i=2)||(i=4)){
+#ifdef BACK_MOTOR_TILT_ENABLE		//後ろのモータもチルトする場合
+			roll_scale		= _rotors[i].roll_scale * tmp_cos;		//チルト角の増加と共に、ロール指令を減少
+			pitch_scale		= _rotors[i].pitch_scale * tmp_cos;		//チルト角の増加と共に、ピッチ指令を減少
+			yaw_scale		= _rotors[i].yaw_scale * tmp_cos;		//チルト角の増加と共に、ヨー指令を減少
+			thrust_scale	= _rotors[i].thrust_scale;
+#else
+			roll_scale		= _rotors[i].roll_scale;
+			pitch_scale		= _rotors[i].pitch_scale;
 			yaw_scale		= _rotors[i].yaw_scale;
 			thrust_scale	= _rotors[i].thrust_scale;
+#endif
 		}
 		outputs[i] = roll * roll_scale +
 			     pitch * pitch_scale +
@@ -432,7 +437,10 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	// Do the mixing using the strategy given by the current Airmode configuration
 	switch (_airmode) {
 	case Airmode::roll_pitch:
-		mix_airmode_rp(roll, pitch, yaw, thrust, outputs);
+		//mix_airmode_rp(roll, pitch, yaw, thrust, outputs);
+		//test
+		mix_airmode_rpy(roll, pitch, yaw, thrust, outputs);
+
 		break;
 
 	case Airmode::roll_pitch_yaw:
@@ -441,8 +449,8 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 
 	case Airmode::disabled:
 	default: // just in case: default to disabled
-//		mix_airmode_disabled(roll, pitch, yaw, thrust, outputs);
-//test
+		//mix_airmode_disabled(roll, pitch, yaw, thrust, outputs);
+		//test
 		mix_airmode_rpy(roll, pitch, yaw, thrust, outputs);
 
 		break;

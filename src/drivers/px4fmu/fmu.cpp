@@ -749,7 +749,7 @@ bool PX4FMU::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
 		if (rc_updated) {
 			//@10ch: min_val = 964(=67Hz), max_val = 2064(=400Hz);
 			unsigned alt_rate = ((400-67)*(rc_input.values[9]-964)/(2064-964))+67;	//[Hz]
-			set_pwm_rate(_pwm_alt_rate_channels, _pwm_default_rate, alt_rate);
+			set_pwm_rate(_pwm_alt_rate_channels, _pwm_default_rate, alt_rate);		//タイマレジスタ更新
 			//up_pwm_servo_set_rate_group_update(unsigned group, unsigned rate);
 
 			//次回取り込み準備
@@ -757,7 +757,7 @@ bool PX4FMU::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
 		}
 #endif
 		for (size_t i = 0; i < num_outputs; i++) {
-			up_pwm_servo_set(i, outputs[i]);
+			up_pwm_servo_set(i, outputs[i]);		//タイマレジスタ更新
 		}
 	}
 
